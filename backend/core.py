@@ -4,7 +4,7 @@ import json, os, re, sqlite3, threading, uuid
 from datetime import datetime, timezone
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR = os.path.join(os.path.dirname(BASE_DIR), "data")
+DATA_DIR = os.path.join("/tmp", "haq_data") if os.environ.get("VERCEL") else os.path.join(os.path.dirname(BASE_DIR), "data")
 RULES_DIR = os.path.join(BASE_DIR, "rules")
 os.makedirs(DATA_DIR, exist_ok=True)
 
