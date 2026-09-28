@@ -16,7 +16,7 @@ from .adapters import build_tools, MODE_LABELS
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 FRONTEND = os.path.join(os.path.dirname(BASE), "frontend")
-UPLOADS = os.path.join(os.path.dirname(BASE), "data", "uploads")
+UPLOADS = os.path.join("/tmp", "haq_uploads") if os.environ.get("VERCEL") else os.path.join(os.path.dirname(BASE), "data", "uploads")
 os.makedirs(UPLOADS, exist_ok=True)
 
 app = FastAPI(title="HAQ — DBT Payment Recovery Agent", version="1.0")
