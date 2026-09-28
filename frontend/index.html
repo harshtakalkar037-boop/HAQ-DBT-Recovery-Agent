@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>HAQ हक़ — The DBT Payment Recovery Agent</title>
+<meta name="description" content="Find out why your government payment is stuck — and let HAQ work out what to do next."/>
+<link rel="stylesheet" href="/static/styles.css"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230b1b36'/><text x='50' y='68' font-size='52' text-anchor='middle' fill='%23ff9d3c' font-family='Arial' font-weight='bold'>ह</text></svg>"/>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<!-- ======================= TOP BAR ======================= -->
+<header class="topbar" role="banner">
+  <div class="brand" onclick="App.goHome()" tabindex="0" onkeydown="if(event.key==='Enter')App.goHome()" aria-label="HAQ home">
+    <div class="brand-mark">ह</div>
+    <div>
+      <div class="brand-name">HAQ <span>हक़</span></div>
+      <div class="brand-sub">DBT PAYMENT RECOVERY AGENT</div>
+    </div>
+  </div>
+  <div class="topbar-mid" id="topbar-case"></div>
+  <div class="topbar-right">
+    <span class="badge badge-demo" id="mode-badge" title="Demo mode: live public tools where possible, honestly-labelled simulated institutional responses otherwise">DEMO MODE</span>
+    <button class="a11y-btn" onclick="App.zoomText(-1)" title="Smaller text" aria-label="Decrease text size">A−</button>
+    <button class="a11y-btn" onclick="App.zoomText(1)" title="Larger text" aria-label="Increase text size">A+</button>
+    <button class="a11y-btn" onclick="App.toggleContrast()" title="High contrast" aria-label="Toggle high contrast">◐</button>
+    <button class="a11y-btn" onclick="App.toggleLang()" id="lang-btn" title="Switch language">EN / हिं</button>
+    <button class="btn btn-ghost" onclick="App.openPrivacy()" aria-label="Privacy and Security">🔒 <span data-i18n="privacy">Privacy</span></button>
+    <button class="btn btn-ghost" onclick="App.openSources()" aria-label="Sources">🔗 <span data-i18n="sources">Sources</span></button>
+    <button class="btn btn-ghost" onclick="App.goHome()">⌂ <span data-i18n="home">Home</span></button>
+  </div>
+</header>
+
+<div id="banner-area" role="alert" aria-live="polite"></div>
+
+<main id="main-content">
+<!-- ======================= LANDING ======================= -->
+<div id="view-landing" class="view">
+  <section class="hero">
+    <div class="hero-left">
+      <div class="hero-kicker">भारत अजेंटिक 2026 · AN AGENTIC AI CASE-RESOLUTION AGENT</div>
+      <h1>HAQ<br/><span class="hi hero-hi">हक़ आपका है. पैसा भी आपका है.</span></h1>
+      <p class="hero-sub" data-i18n="hero_sub">Find out why your government payment is stuck — and let HAQ work out what to do next.</p>
+      <div class="hero-cta">
+        <button class="btn btn-primary btn-lg" onclick="App.startMyCase()" data-i18n="start_case">Start My Case →</button>
+        <button class="btn btn-outline btn-lg" onclick="App.howItWorks()" data-i18n="how_it_works">See How HAQ Works</button>
+      </div>
+      <div class="hero-flow">
+        <span>UNDERSTAND</span><i>→</i><span>INVESTIGATE</span><i>→</i><span>DIAGNOSE</span><i>→</i>
+        <span>PLAN</span><i>→</i><span>ACT</span><i>→</i><span>VERIFY</span><i>→</i><span>RE-PLAN</span><i>→</i><span>FOLLOW UP</span>
+      </div>
+      <div class="hero-note">🛡️ <span data-i18n="not_chatbot">HAQ is not a chatbot. It is an AI case-resolution agent that does the work.</span></div>
+    </div>
+    <div class="hero-right">
+      <!-- animated payment chain -->
+      <div class="chain-card" aria-label="DBT payment chain animation">
+        <div class="chain-title">THE DBT PAYMENT CHAIN — <span class="chain-where" id="chain-where">watch where it breaks</span></div>
+        <div class="chain" id="payment-chain">
+          <div class="chain-node" data-node="SCHEME"><div class="cn-dot"></div><div class="cn-label">SCHEME</div></div>
+          <div class="chain-arrow"></div>
+          <div class="chain-node" data-node="PFMS"><div class="cn-dot"></div><div class="cn-label">PFMS / TREASURY</div></div>
+          <div class="chain-arrow"></div>
+          <div class="chain-node" data-node="APBS"><div class="cn-dot"></div><div class="cn-label">APBS</div></div>
+          <div class="chain-arrow"></div>
+          <div class="chain-node" data-node="NPCI"><div class="cn-dot"></div><div class="cn-label">NPCI MAPPER</div></div>
+          <div class="chain-arrow"></div>
+          <div class="chain-node fail-node" data-node="BANK"><div class="cn-dot"></div><div class="cn-label">BANK</div><div class="cn-fail">✕ credit bounced</div></div>
+          <div class="chain-arrow"></div>
+          <div class="chain-node you-node" data-node="YOU"><div class="cn-dot"></div><div class="cn-label">YOU</div></div>
+        </div>
+        <div class="chain-foot">HAQ investigates every stage with real public tools + honest adapters — and shows you exactly where the money died.</div>
+      </div>
+      <div class="terminal" aria-hidden="true">
+        <div class="term-head"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <span class="term-title">agent-orchestrator — live</span></div>
+        <div class="term-body" id="hero-terminal">
+          <div class="t-line"><b class="c-blue">SAMVAAD</b> ▸ ✓ Extracted 18 fields</div>
+          <div class="t-line"><b class="c-amber">KHOJ</b> ▸ 🔧 Calling IFSC_LOOKUP <span class="c-green">🟢 LIVE</span></div>
+          <div class="t-line"><b class="c-green">KHOJ</b> ▸ ✓ Evidence received · 19:02 IST</div>
+          <div class="t-line"><b class="c-amber">KHOJ</b> ▸ 🔧 Checking NPCI_MAPPER <span class="c-gray">🟡 DEMO</span></div>
+          <div class="t-line"><b class="c-purple">NIDAAN</b> ▸ 🧠 Comparing 4 evidence sources</div>
+          <div class="t-line"><b class="c-purple">YOJNA</b> ▸ 📋 Building dependency graph</div>
+          <div class="t-line"><b class="c-green">SATYAPAN</b> ▸ ✓ Validating documents</div>
+          <div class="t-line"><b class="c-blue">ANUSARAN</b> ▸ ⏰ Scheduling follow-up</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- demo cases -->
+  <section class="section" id="demo-cards">
+    <h2><span class="num">01</span> <span data-i18n="demo_cases">Demo cases</span> <small data-i18n="demo_cases_sub">synthetic beneficiaries · realistic failure chains · runs the full agent workflow</small></h2>
+    <div class="cards" id="catalog-cards"></div>
+    <div class="demo-strip">🟡 <b>DEMO MODE</b> — seeded cases use synthetic data and simulated institutional responses (clearly labelled).
+    Live public tools (IFSC directory, pincode directory, official guidance retrieval) make <i>real</i> calls in every run.</div>
+  </section>
+
+  <!-- how it works -->
+  <section class="section" id="how-it-works">
+    <h2><span class="num">02</span> <span data-i18n="how_title">How HAQ works</span> <small>8 specialized agents · shared state · visible tool calls</small></h2>
+    <div class="cards agents-grid" id="agent-cards"></div>
+  </section>
+
+  <!-- trust -->
+  <section class="section principles">
+    <h2><span class="num">03</span> Built on trust</h2>
+    <div class="cards">
+      <div class="card"><h3>🟢 Honest sources</h3><p>Every result shows <b>source · LIVE/DEMO · timestamp · confidence</b>. Simulated responses are never shown as live government data.</p></div>
+      <div class="card"><h3>🧠 Hybrid AI</h3><p>LLMs handle messy language and documents. <b>Deterministic rules</b> own taxonomy, ordering, deadlines and policy — the LLM never invents government rules.</p></div>
+      <div class="card"><h3>🛡️ Privacy first</h3><p>Data minimisation, masked Aadhaar & account numbers, consent before processing, and <b>Delete My Case</b> whenever you want.</p></div>
+    </div>
+  </section>
+</div>
+
+<!-- ======================= INTAKE ======================= -->
+<div id="view-intake" class="view hidden">
+  <section class="panel intake-panel">
+    <h2 data-i18n="start_case_title">Start your case</h2>
+    <p class="muted"><span data-i18n="start_case_sub">Tell us what happened — Hindi, English or Hinglish. Add whatever documents you have.</span></p>
+    <div class="voice-row">
+      <button class="btn btn-outline" id="btn-mic" onclick="App.toggleMic()">🎤 <span data-i18n="speak">Speak instead</span></button>
+      <span class="muted small" id="mic-status" aria-live="polite"></span>
+    </div>
+    <label class="fld"><span data-i18n="describe">Describe the problem</span>
+      <textarea id="in-narrative" rows="4" aria-label="Describe the problem" placeholder="e.g. Meri dadi ki pension teen mahine se nahi aayi…"></textarea>
+    </label>
+    <div class="fld-row">
+      <label class="fld"><span data-i18n="beneficiary_name">Beneficiary name</span>
+        <input id="in-name" placeholder="As per Aadhaar" aria-label="Beneficiary name"/></label>
+      <label class="fld"><span data-i18n="scheme">Scheme</span>
+        <select id="in-scheme" aria-label="Scheme">
+          <option value="Old Age Pension (NSAP-IGNOAPS + State share)">Old Age Pension (NSAP + State)</option>
+          <option value="Post-Matric Scholarship (NSP / PFMS)">Post-Matric Scholarship (NSP)</option>
+          <option value="PM-KISAN Samman Nidhi">PM-KISAN Samman Nidhi</option>
+          <option value="MGNREGA Wage Payment">MGNREGA Wage Payment</option>
+          <option value="Other DBT Scheme">Other DBT Scheme</option>
+        </select></label>
+    </div>
+    <div class="fld-row">
+      <label class="fld"><span data-i18n="account">Account number</span><input id="in-acct" placeholder="e.g. 6031224521" aria-label="Account number"/></label>
+      <label class="fld"><span data-i18n="ifsc">IFSC</span><input id="in-ifsc" placeholder="e.g. MAHB0001234" aria-label="IFSC"/></label>
+      <label class="fld">Pincode<input id="in-pin" placeholder="e.g. 422103" aria-label="Pincode"/></label>
+    </div>
+    <div class="upload-zone" id="upload-zone">
+      <div class="up-icon">📄</div>
+      <div><b data-i18n="add_docs">Add documents</b> — Aadhaar, passbook, failure SMS, scheme letter</div>
+      <div class="muted small">Photos are read by OCR but <b>never blindly trusted</b> — you confirm the fields.</div>
+      <div class="up-buttons">
+        <label class="btn btn-outline">📎 <span data-i18n="upload">Upload file</span><input type="file" id="in-file" hidden accept=".txt,.csv,.log,.png,.jpg,.jpeg,.webp"/></label>
+        <button class="btn btn-ghost" onclick="App.addTextDoc()">+ <span data-i18n="paste_doc">Paste document text</span></button>
+      </div>
+    </div>
+    <div id="doc-list" class="doc-list"></div>
+
+    <!-- consent gate -->
+    <div class="consent-box" id="consent-box">
+      <div class="consent-icon">🔐</div>
+      <div>
+        <b data-i18n="consent_title">Your documents contain sensitive information.</b>
+        <p class="muted small" data-i18n="consent_body">HAQ will use them only to analyze this case and prepare the requested actions.</p>
+        <label class="consent-check"><input type="checkbox" id="in-consent"/> <span data-i18n="consent_check">I have read the privacy notice and consent to processing for this case.</span></label>
+      </div>
+    </div>
+    <div class="intake-actions">
+      <button class="btn btn-primary btn-lg" onclick="App.submitCase()" data-i18n="agree_continue">✓ I Agree & Continue</button>
+      <button class="btn btn-ghost" onclick="App.openPrivacy()" data-i18n="read_privacy">Read Privacy Policy</button>
+    </div>
+  </section>
+</div>
+
+<!-- ======================= COMMAND CENTER ======================= -->
+<div id="view-case" class="view hidden">
+  <section class="case-head panel">
+    <div class="ch-left">
+      <div class="case-id" id="ch-id">CASE —</div>
+      <div class="case-person" id="ch-person"></div>
+    </div>
+    <div class="ch-mid"><div class="chip-stack" id="ch-causes"></div></div>
+    <div class="ch-right">
+      <div class="status-pill" id="ch-status">—</div>
+      <div class="watch-pill" id="ch-watch">WATCHDOG —</div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-title">AGENT BOARD <span class="muted small" id="board-progress"></span></div>
+    <div class="agent-board" id="agent-board"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-title">DBT PIPELINE — EVIDENCE CHAIN
+      <span class="muted small">KHOJ's real tool calls · <span class="pill ok">🟢 LIVE</span> <span class="pill warn">🟡 DEMO</span></span></div>
+    <div class="pipeline" id="pipeline"></div>
+  </section>
+
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Case sections">
+    <button data-tab="overview" class="tab active" role="tab">Overview</button>
+    <button data-tab="evidence" class="tab" role="tab">Evidence</button>
+    <button data-tab="activity" class="tab" role="tab">Agent Activity</button>
+    <button data-tab="diagnosis" class="tab" role="tab">Diagnosis</button>
+    <button data-tab="plan" class="tab" role="tab">Plan</button>
+    <button data-tab="docs" class="tab" role="tab">Documents</button>
+    <button data-tab="verify" class="tab" role="tab">Verification</button>
+    <button data-tab="timeline" class="tab" role="tab">Timeline</button>
+  </nav>
+  <section class="panel tab-body" id="tab-body" role="tabpanel"></section>
+
+  <section class="panel action-center">
+    <div class="panel-title">CASE ACTIONS</div>
+    <div class="action-row">
+      <button class="btn btn-amber" id="btn-new-evidence" onclick="App.deliverSeedEvidence()">📥 <span data-i18n="new_evidence">Deliver new evidence</span> (demo: passbook page 2)</button>
+      <label class="btn btn-outline">📎 <span data-i18n="upload_evidence">Upload new evidence</span><input type="file" id="ev-file" hidden/></label>
+      <span class="spacer"></span>
+      <button class="btn btn-ghost" onclick="App.simulate('bank_visit_done')">✓ Bank visit done</button>
+      <button class="btn btn-ghost" onclick="App.simulate('mapper_verified')">✓ Mapper verified</button>
+      <button class="btn btn-green" onclick="App.simulate('payment_received')">₹ Payment received — verify &amp; close</button>
+      <button class="btn btn-ghost btn-danger" onclick="App.deleteCase()">🗑 <span data-i18n="delete_case">Delete My Case</span></button>
+    </div>
+  </section>
+</div>
+</main>
+
+<!-- ======================= FOOTER ======================= -->
+<footer class="foot" role="contentinfo">
+  <div class="foot-grid">
+    <div>
+      <div class="foot-brand">HAQ <span>हक़</span></div>
+      <div class="hi foot-tag">हक़ आपका है. पैसा भी आपका है.</div>
+      <div class="muted small" style="margin-top:8px">The DBT Payment Recovery Agent — an AI case-resolution agent for Bharat Agentic 2026.</div>
+    </div>
+    <div class="foot-links">
+      <a href="#" onclick="App.openAbout();return false">About HAQ</a>
+      <a href="#" onclick="App.howItWorks();return false">How It Works</a>
+      <a href="#" onclick="App.openPrivacy();return false">Privacy Policy</a>
+      <a href="#" onclick="App.openTerms();return false">Terms of Use</a>
+      <a href="#" onclick="App.openPrivacy();return false">Data &amp; Security</a>
+      <a href="#" onclick="App.openContact();return false">Contact</a>
+      <a href="#" onclick="App.openSources();return false">Sources</a>
+      <a href="#" onclick="App.openAccessibility();return false">Accessibility</a>
+    </div>
+  </div>
+  <div class="disclaimer">
+    <b>Disclaimer:</b> HAQ provides information, evidence analysis and assistance in preparing resolution actions.
+    It does not guarantee government payment, bank approval, benefit eligibility or grievance resolution. Users should
+    verify important actions with the relevant government department, bank or qualified professional.
+    <br/>Demo mode may use synthetic beneficiary data and simulated institutional responses. Live sources are explicitly labelled.
+  </div>
+  <div class="foot-copy">© 2026 HAQ · Built with the HAQ agent framework · <span class="hi">सत्यमेव जयते</span></div>
+</footer>
+
+<!-- ======================= MODALS ======================= -->
+<div class="modal hidden" id="doc-modal" role="dialog" aria-modal="true" aria-label="Document preview">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div id="modal-title">Document</div>
+      <div>
+        <button class="btn btn-outline" onclick="App.downloadDoc()">⬇ Download</button>
+        <button class="btn btn-outline" onclick="App.printDoc()">🖨 Print / PDF</button>
+        <button class="btn btn-ghost" onclick="App.closeDoc()" aria-label="Close">✕</button>
+      </div>
+    </div>
+    <div class="modal-body"><iframe id="doc-frame" title="document preview"></iframe></div>
+    <div class="modal-foot muted small">Preview → SATYAPAN has verified this document against the case file. Download and submit to the authority shown.</div>
+  </div>
+</div>
+
+<div class="modal hidden" id="info-modal" role="dialog" aria-modal="true" aria-label="Information">
+  <div class="modal-card modal-info">
+    <div class="modal-head">
+      <div id="info-title">Information</div>
+      <button class="btn btn-ghost" onclick="App.closeInfo()" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body info-body" id="info-body"></div>
+  </div>
+</div>
+
+</body>
+<script src="/static/app.js"></script>
+</html>

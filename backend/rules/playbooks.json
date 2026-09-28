@@ -1,0 +1,277 @@
+{
+  "version": "1.0",
+  "description": "Resolution playbooks: cause -> ordered step keys. Step definitions carry owner, dependencies, deadlines, required documents and the document type KARM must generate. NYAYA re-validates ordering and may block steps.",
+  "steps": {
+    "REACTIVATE_DORMANT_ACCOUNT": {
+      "action": "Reactivate dormant account (small deposit/withdrawal + fresh KYC at branch)",
+      "action_hi": "डोरमेंट खाता फिर से सक्रिय करें (छोटी जमा/निकासी + केवाईसी)",
+      "owner": "USER_AT_BANK",
+      "depends_on": [],
+      "deadline_days": 1,
+      "required_docs": [
+        "Aadhaar copy",
+        "Passbook",
+        "PAN or voter ID (KYC)"
+      ],
+      "doc_type": null,
+      "notes": "A dormant account is reactivatable — do NOT close it. A single customer-initiated transaction plus KYC restores it.",
+      "completion_condition": "One customer-initiated transaction posted on the account + KYC accepted at the branch (passbook/mini-statement shows the entry)."
+    },
+    "OLD_ACCOUNT_ACTION": {
+      "action": "Obtain closure/status confirmation from old mapped branch and request return of bounced credits",
+      "action_hi": "पुरानी शाखा से खाता स्थिति पुष्टि और लौटे भुगतान की वापसी का अनुरोध",
+      "owner": "USER_AT_BANK",
+      "depends_on": [],
+      "deadline_days": 3,
+      "required_docs": [
+        "Aadhaar copy",
+        "Old passbook"
+      ],
+      "doc_type": "OLD_BRANCH_LETTER",
+      "notes": "Only when the account is genuinely closed.",
+      "completion_condition": "Written status confirmation from the old branch received, and any bounced credits traced with the return reference."
+    },
+    "BANK_NAME_CORRECTION": {
+      "action": "Correct beneficiary name in bank records to match Aadhaar (KYC name correction)",
+      "action_hi": "बैंक रिकॉर्ड में नाम सुधार (आधार के अनुसार)",
+      "owner": "USER_AT_BANK",
+      "depends_on": [],
+      "deadline_days": 2,
+      "required_docs": [
+        "Aadhaar copy",
+        "Passbook",
+        "Name correction request letter"
+      ],
+      "doc_type": "KYC_NAME_CORRECTION",
+      "notes": "B06 rule: seeding is rejected while the name mismatch exists. This MUST complete before re-seeding.",
+      "completion_condition": "Bank confirms the KYC name in CBS now matches the Aadhaar name character-by-character."
+    },
+    "EKYC_COMPLETION": {
+      "action": "Complete scheme eKYC (OTP or face auth at CSC / scheme portal)",
+      "action_hi": "योजना ई-केवाईसी पूरी करें (सीएससी / पोर्टल)",
+      "owner": "USER_AT_CSC",
+      "depends_on": [],
+      "deadline_days": 2,
+      "required_docs": [
+        "Aadhaar",
+        "Registered mobile for OTP"
+      ],
+      "doc_type": null,
+      "notes": "Independent of bank-side fixes.",
+      "completion_condition": "Scheme portal shows eKYC status = Completed."
+    },
+    "LIFE_CERTIFICATE_SUBMISSION": {
+      "action": "Submit annual life certificate (Jeevan Pramaan) before the 30 November deadline",
+      "action_hi": "जीवन प्रमाणपत्र जमा करें (30 नवंबर से पहले)",
+      "owner": "USER",
+      "depends_on": [],
+      "deadline_days": 5,
+      "required_docs": [
+        "Aadhaar",
+        "Pension payment order number"
+      ],
+      "doc_type": null,
+      "notes": "Separate stoppage risk — scheduled even when another cause explains the current failure.",
+      "completion_condition": "Life certificate acknowledgement received (Jeevan Pramaan ID or bank stamp)."
+    },
+    "AADHAAR_SEEDING_REQUEST": {
+      "action": "Submit Aadhaar seeding request (Annexure I) at the preferred bank branch to fix the NPCI mapper",
+      "action_hi": "बैंक शाखा में आधार सीडिंग (अनुबंध-I) जमा करें",
+      "owner": "USER_AT_BANK",
+      "depends_on": [
+        "BANK_NAME_CORRECTION",
+        "REACTIVATE_DORMANT_ACCOUNT",
+        "OLD_ACCOUNT_ACTION"
+      ],
+      "deadline_days": 1,
+      "required_docs": [
+        "Aadhaar copy",
+        "Passbook",
+        "Filled Annexure I seeding request"
+      ],
+      "doc_type": "AADHAAR_SEEDING_REQUEST",
+      "notes": "NPCI validates with UIDAI in 24-48 hours. Ask for the acknowledgement receipt with the seeding request number.",
+      "completion_condition": "Seeding acknowledgement receipt with request number received; NPCI mapper flips to 'Enabled for DBT' within 48h–7 days."
+    },
+    "VERIFY_MAPPER": {
+      "action": "Verify NPCI mapper now shows 'Enabled for DBT' for the correct account",
+      "action_hi": "एनपीसीआई मैपर में 'Enabled for DBT' स्थिति की जांच करें",
+      "owner": "HAQ_AGENT",
+      "depends_on": [
+        "AADHAAR_SEEDING_REQUEST"
+      ],
+      "deadline_days": 2,
+      "required_docs": [],
+      "doc_type": null,
+      "notes": "Re-check 48h-7d after seeding. HAQ watchdog performs this check.",
+      "completion_condition": "NPCI mapper check returns 'Enabled for DBT' pointing to the intended account."
+    },
+    "REPROCESS_REQUEST": {
+      "action": "Request scheme department to re-process the failed installments (quote URN)",
+      "action_hi": "योजना विभाग से फंसी किस्तों की दोबारा प्रोसेसिंग का अनुरोध (URN के साथ)",
+      "owner": "SCHEME_DEPT",
+      "depends_on": [
+        "VERIFY_MAPPER"
+      ],
+      "deadline_days": 7,
+      "required_docs": [
+        "Scheme beneficiary ID",
+        "URN references",
+        "Bank acknowledgement of fix"
+      ],
+      "doc_type": "PAYMENT_REPROCESSING_REQUEST",
+      "notes": "Rejected funds have returned to the government account — they must be re-released.",
+      "completion_condition": "Scheme office confirms re-processing with a new credit reference; amount credited to the account."
+    },
+    "NON_PAYMENT_CERTIFICATE": {
+      "action": "Obtain non-payment certificate from bank (required by Tahsildar/DSWO for pension arrears)",
+      "action_hi": "बैंक से गैर-भुगतान प्रमाणपत्र लें (पेंशन बकाया के लिए आवश्यक)",
+      "owner": "USER_AT_BANK",
+      "depends_on": [],
+      "deadline_days": 3,
+      "required_docs": [
+        "Written request letter",
+        "Passbook"
+      ],
+      "doc_type": "NON_PAYMENT_CERTIFICATE",
+      "notes": "Mandatory supporting document for pension arrears claims with the district social welfare office.",
+      "completion_condition": "Signed non-payment certificate issued on bank letterhead."
+    },
+    "ESCALATE_CPGRAMS": {
+      "action": "File CPGRAMS grievance against the scheme department if unresolved",
+      "action_hi": "सीपीजीआरएएमएस शिकायत दर्ज करें (समाधान न होने पर)",
+      "owner": "HAQ_AGENT_PREPARES",
+      "depends_on": [
+        "REPROCESS_REQUEST"
+      ],
+      "deadline_days": 15,
+      "required_docs": [
+        "Case summary",
+        "Evidence pack",
+        "URN list"
+      ],
+      "doc_type": "CPGRAMS_GRIEVANCE",
+      "notes": "Auto-prepared by HAQ if the re-processing request is unanswered by T+15.",
+      "completion_condition": "CPGRAMS grievance filed and DARPG grievance number recorded."
+    },
+    "ESCALATE_RTI": {
+      "action": "File RTI to the scheme department asking which account received each credit, date and seeding status",
+      "action_hi": "आरटीआई दायर करें (किस खाते में भुगतान गया — पूरी जानकारी के लिए)",
+      "owner": "HAQ_AGENT_PREPARES",
+      "depends_on": [
+        "ESCALATE_CPGRAMS"
+      ],
+      "deadline_days": 30,
+      "required_docs": [
+        "RTI application",
+        "₹10 fee/IPO proof plan"
+      ],
+      "doc_type": "RTI_APPLICATION",
+      "notes": "Last resort in the ladder: nodal officer -> CPGRAMS -> RTI -> first appeal.",
+      "completion_condition": "RTI application filed with acknowledgment; reply received within 30 days."
+    }
+  },
+  "cause_playbooks": {
+    "NAME_MISMATCH": [
+      "BANK_NAME_CORRECTION",
+      "AADHAAR_SEEDING_REQUEST",
+      "VERIFY_MAPPER",
+      "REPROCESS_REQUEST",
+      "ESCALATE_CPGRAMS",
+      "ESCALATE_RTI"
+    ],
+    "CLOSED_MAPPED_ACCOUNT": [
+      "OLD_ACCOUNT_ACTION",
+      "BANK_NAME_CORRECTION",
+      "AADHAAR_SEEDING_REQUEST",
+      "VERIFY_MAPPER",
+      "REPROCESS_REQUEST",
+      "ESCALATE_CPGRAMS",
+      "ESCALATE_RTI"
+    ],
+    "DORMANT_MAPPED_ACCOUNT": [
+      "REACTIVATE_DORMANT_ACCOUNT",
+      "BANK_NAME_CORRECTION",
+      "AADHAAR_SEEDING_REQUEST",
+      "VERIFY_MAPPER",
+      "REPROCESS_REQUEST",
+      "ESCALATE_CPGRAMS",
+      "ESCALATE_RTI"
+    ],
+    "AADHAAR_NOT_SEEDED": [
+      "BANK_NAME_CORRECTION",
+      "AADHAAR_SEEDING_REQUEST",
+      "VERIFY_MAPPER",
+      "REPROCESS_REQUEST",
+      "ESCALATE_CPGRAMS",
+      "ESCALATE_RTI"
+    ],
+    "PAYMENT_MAPPED_TO_OTHER_ACCOUNT": [
+      "OLD_ACCOUNT_ACTION",
+      "AADHAAR_SEEDING_REQUEST",
+      "VERIFY_MAPPER",
+      "REPROCESS_REQUEST",
+      "ESCALATE_CPGRAMS",
+      "ESCALATE_RTI"
+    ],
+    "ACCOUNT_VALIDATION_FAILED": [
+      "BANK_NAME_CORRECTION",
+      "AADHAAR_SEEDING_REQUEST",
+      "VERIFY_MAPPER",
+      "REPROCESS_REQUEST",
+      "ESCALATE_CPGRAMS",
+      "ESCALATE_RTI"
+    ],
+    "INVALID_IFSC": [
+      "REPROCESS_REQUEST",
+      "VERIFY_MAPPER",
+      "ESCALATE_CPGRAMS",
+      "ESCALATE_RTI"
+    ],
+    "EKYC_PENDING": [
+      "EKYC_COMPLETION",
+      "REPROCESS_REQUEST",
+      "ESCALATE_CPGRAMS",
+      "ESCALATE_RTI"
+    ],
+    "LIFE_CERTIFICATE_PENDING": [
+      "LIFE_CERTIFICATE_SUBMISSION"
+    ],
+    "APBS_PAYMENT_RETURNED": [
+      "REACTIVATE_DORMANT_ACCOUNT",
+      "BANK_NAME_CORRECTION",
+      "AADHAAR_SEEDING_REQUEST",
+      "VERIFY_MAPPER",
+      "REPROCESS_REQUEST",
+      "ESCALATE_CPGRAMS",
+      "ESCALATE_RTI"
+    ],
+    "SCHEME_NOT_RELEASED": [
+      "REPROCESS_REQUEST",
+      "ESCALATE_CPGRAMS",
+      "ESCALATE_RTI"
+    ],
+    "OTHER": [
+      "REPROCESS_REQUEST",
+      "ESCALATE_CPGRAMS",
+      "ESCALATE_RTI"
+    ]
+  },
+  "always_documents": [
+    "BANK_COUNTER_SCRIPT",
+    "WHATSAPP_UPDATE"
+  ],
+  "step_order_index": {
+    "REACTIVATE_DORMANT_ACCOUNT": 1,
+    "OLD_ACCOUNT_ACTION": 1,
+    "EKYC_COMPLETION": 1,
+    "LIFE_CERTIFICATE_SUBMISSION": 1,
+    "BANK_NAME_CORRECTION": 2,
+    "AADHAAR_SEEDING_REQUEST": 3,
+    "VERIFY_MAPPER": 4,
+    "NON_PAYMENT_CERTIFICATE": 5,
+    "REPROCESS_REQUEST": 6,
+    "ESCALATE_CPGRAMS": 7,
+    "ESCALATE_RTI": 8
+  }
+}

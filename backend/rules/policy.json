@@ -1,0 +1,152 @@
+{
+  "version": "1.0",
+  "description": "NYAYA policy layer — deterministic rules engine. Conditions are evaluated against case facts; effects block steps, set deadlines, add guardrails and trigger escalations. The LLM has NO authority over these rules.",
+  "facts_doc": "Supported facts: cause_active[code]=bool, step_status[key]=PENDING|BLOCKED|READY|DONE|REPLACED|SKIPPED, cause_set has code, scheme_is_pension=bool, has_urn=bool, fields_confirmed=bool, evidence_flag[f]=bool, step_owner[key]=str",
+  "rules": [
+    {
+      "id": "RULE-B06-BLOCK-SEEDING",
+      "label": "Name correction must complete before Aadhaar re-seeding (B06)",
+      "priority": 1,
+      "if": {"all": [
+        {"fact": "cause_active", "arg": "NAME_MISMATCH", "op": "==", "value": true},
+        {"fact": "step_status", "arg": "BANK_NAME_CORRECTION", "op": "!=", "value": "DONE"}
+      ]},
+      "then": [
+        {"action": "block_step", "step": "AADHAAR_SEEDING_REQUEST", "reason": "B06: seeding is rejected while the bank name does not match Aadhaar. Fix the name first, then seed."},
+        {"action": "guardrail", "text": "Do not submit Annexure I until bank KYC name matches Aadhaar exactly."}
+      ]
+    },
+    {
+      "id": "RULE-DORMANT-REACTIVATE-FIRST",
+      "label": "Dormant account must be reactivated before re-seeding",
+      "priority": 2,
+      "if": {"all": [
+        {"fact": "cause_active", "arg": "DORMANT_MAPPED_ACCOUNT", "op": "==", "value": true},
+        {"fact": "step_status", "arg": "REACTIVATE_DORMANT_ACCOUNT", "op": "!=", "value": "DONE"}
+      ]},
+      "then": [
+        {"action": "block_step", "step": "AADHAAR_SEEDING_REQUEST", "reason": "Re-seeding a dormant account will be rejected again. Reactivate the account first (small deposit + KYC)."},
+        {"action": "guardrail", "text": "A dormant account is reactivatable — do NOT close it."}
+      ]
+    },
+    {
+      "id": "RULE-CLOSED-THEN-RESEED",
+      "label": "Closed account requires fresh seeding to an active account",
+      "priority": 2,
+      "if": {"all": [
+        {"fact": "cause_active", "arg": "CLOSED_MAPPED_ACCOUNT", "op": "==", "value": true}
+      ]},
+      "then": [
+        {"action": "guardrail", "text": "Mapper must be re-pointed to an ACTIVE account; credits bounced off a closed account must be re-processed by the scheme."}
+      ]
+    },
+    {
+      "id": "RULE-VERIFY-MAPPER-AFTER-SEEDING",
+      "label": "Mapper verification must follow seeding",
+      "priority": 3,
+      "if": {"all": [
+        {"fact": "step_status", "arg": "AADHAAR_SEEDING_REQUEST", "op": "==", "value": "DONE"},
+        {"fact": "step_status", "arg": "VERIFY_MAPPER", "op": "!=", "value": "DONE"}
+      ]},
+      "then": [
+        {"action": "set_deadline", "step": "VERIFY_MAPPER", "days": 2, "reason": "NPCI/UIDAI validation typically reflects in 24-48 hours."}
+      ]
+    },
+    {
+      "id": "RULE-REPROCESS-AFTER-VERIFIED",
+      "label": "Re-processing request only after mapper is verified",
+      "priority": 3,
+      "if": {"all": [
+        {"fact": "step_status", "arg": "VERIFY_MAPPER", "op": "!=", "value": "DONE"}
+      ]},
+      "then": [
+        {"action": "soft_block", "step": "REPROCESS_REQUEST", "reason": "Re-processing before the mapper is fixed will bounce again. Sequence: fix mapper, then request re-process."}
+      ]
+    },
+    {
+      "id": "RULE-CPGRAMS-AT-15",
+      "label": "Prepare CPGRAMS grievance if re-processing unanswered at T+15",
+      "priority": 4,
+      "if": {"all": [
+        {"fact": "cause_set", "op": "overlaps", "value": ["NAME_MISMATCH", "CLOSED_MAPPED_ACCOUNT", "DORMANT_MAPPED_ACCOUNT", "AADHAAR_NOT_SEEDED", "ACCOUNT_VALIDATION_FAILED", "APBS_PAYMENT_RETURNED", "PAYMENT_MAPPED_TO_OTHER_ACCOUNT", "SCHEME_NOT_RELEASED"]}
+      ]},
+      "then": [
+        {"action": "set_deadline", "step": "ESCALATE_CPGRAMS", "days": 15, "reason": "Escalation ladder: branch -> nodal officer -> scheme nodal -> CPGRAMS at T+15 if unanswered."}
+      ]
+    },
+    {
+      "id": "RULE-RTI-AFTER-CPGRAMS",
+      "label": "RTI follows CPGRAMS (T+30)",
+      "priority": 5,
+      "if": {"all": [
+        {"fact": "step_status", "arg": "ESCALATE_CPGRAMS", "op": "!=", "value": "DONE"}
+      ]},
+      "then": [
+        {"action": "set_deadline", "step": "ESCALATE_RTI", "days": 30, "reason": "RTI is the last resort in the ladder; file after CPGRAMS window with URN references."}
+      ]
+    },
+    {
+      "id": "RULE-PENSION-LIFE-CERT",
+      "label": "Pension cases must schedule the annual life certificate check",
+      "priority": 6,
+      "if": {"all": [
+        {"fact": "scheme_is_pension", "op": "==", "value": true}
+      ]},
+      "then": [
+        {"action": "ensure_step", "step": "LIFE_CERTIFICATE_SUBMISSION", "reason": "Pensions stop every year if the life certificate is not submitted before 30 November — a separate, parallel stoppage risk."},
+        {"action": "guardrail", "text": "Life certificate deadline (30 Nov) is a cliff-edge — schedule it regardless of the current failure cause."}
+      ]
+    },
+    {
+      "id": "RULE-QUOTE-URN",
+      "label": "Every external letter must quote the APBS URN",
+      "priority": 7,
+      "if": {"all": [
+        {"fact": "has_urn", "op": "==", "value": true}
+      ]},
+      "then": [
+        {"action": "guardrail", "text": "Quote the URN in every complaint — it lets the bank trace the exact APBS transaction. Without it, branches say 'no record found'."}
+      ]
+    },
+    {
+      "id": "RULE-DOCS-NEED-CONFIRMED-FIELDS",
+      "label": "Documents may only be marked VERIFIED using confirmed identity fields",
+      "priority": 8,
+      "if": {"all": [
+        {"fact": "fields_confirmed", "op": "==", "value": false}
+      ]},
+      "then": [
+        {"action": "guardrail", "text": "Unconfirmed extracted fields detected — documents remain in DRAFT until the beneficiary confirms them."}
+      ]
+    },
+    {
+      "id": "RULE-INVALIDATE-ON-REPLAN",
+      "label": "Documents of replaced plan steps must be invalidated",
+      "priority": 9,
+      "if": {"all": [
+        {"fact": "evidence_flag", "arg": "REPLAN_TRIGGERED", "op": "==", "value": true}
+      ]},
+      "then": [
+        {"action": "guardrail", "text": "Resolution plan changed after new evidence — documents generated for replaced steps are marked INVALIDATED with the reason shown."}
+      ]
+    },
+    {
+      "id": "RULE-EKYC-PARALLEL",
+      "label": "eKYC completion runs in parallel with bank fixes",
+      "priority": 6,
+      "if": {"all": [
+        {"fact": "cause_active", "arg": "EKYC_PENDING", "op": "==", "value": true}
+      ]},
+      "then": [
+        {"action": "guardrail", "text": "eKYC does not depend on bank fixes — complete it at the CSC/portal immediately in parallel."}
+      ]
+    }
+  ],
+  "escalation_ladder": [
+    {"level": 1, "step": "Bank branch visit with prepared documents", "t": "T+0 to T+2"},
+    {"level": 2, "step": "Bank nodal officer (written complaint with acknowledgement)", "t": "T+7"},
+    {"level": 3, "step": "Scheme nodal officer (re-processing request)", "t": "T+7"},
+    {"level": 4, "step": "CPGRAMS grievance", "t": "T+15"},
+    {"level": 5, "step": "RTI to scheme PIO (+ first appeal if evasive)", "t": "T+30"}
+  ]
+}

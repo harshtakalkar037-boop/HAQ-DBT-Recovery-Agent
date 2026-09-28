@@ -1,0 +1,147 @@
+{
+  "version": "1.0",
+  "description": "HAQ failure taxonomy — the ONLY source of truth for DBT failure causes. The LLM may explain these causes but may never invent new ones.",
+  "causes": {
+    "NAME_MISMATCH": {
+      "code": "NAME_MISMATCH",
+      "code_ref": "NPCI/B06 · PFMS Account Validation Failed",
+      "label": "Beneficiary name mismatch across Aadhaar / bank / scheme records",
+      "label_hi": "आधार, बैंक और योजना रिकॉर्ड में नाम अलग है",
+      "description": "Name on Aadhaar does not match bank records or scheme application character-by-character. B06 rejection blocks Aadhaar seeding until the bank record is corrected.",
+      "severity": "HIGH",
+      "signals": [
+        {"id": "SIG_NAME_MISMATCH_DOCS", "weight": 3, "text": "Identity graph shows name fields differ between documents"},
+        {"id": "SIG_PFMS_VALIDATION_FAILED", "weight": 2, "text": "PFMS returned ACCOUNT_VALIDATION_FAILED"},
+        {"id": "SIG_BANK_B06", "weight": 3, "text": "Bank/NPCI returned B06 name mismatch"}
+      ]
+    },
+    "CLOSED_MAPPED_ACCOUNT": {
+      "code": "CLOSED_MAPPED_ACCOUNT",
+      "code_ref": "APBS return · Bank credit unsuccessful",
+      "label": "NPCI mapper points to a closed bank account",
+      "label_hi": "एनपीसीआई मैपर बंद खाते की ओर इशारा कर रहा है",
+      "description": "The Aadhaar in the NPCI mapper is linked to an account the bank reports as closed. Credits are returned to the sponsor bank/government.",
+      "severity": "CRITICAL",
+      "signals": [
+        {"id": "SIG_MAPPER_INACTIVE", "weight": 2, "text": "NPCI mapper status is not 'Enabled for DBT'"},
+        {"id": "SIG_BANK_ACCOUNT_CLOSED", "weight": 3, "text": "Bank system reports account closed"},
+        {"id": "SIG_APBS_RETURNED", "weight": 2, "text": "APBS returned the credit"}
+      ]
+    },
+    "DORMANT_MAPPED_ACCOUNT": {
+      "code": "DORMANT_MAPPED_ACCOUNT",
+      "code_ref": "Bank credit unsuccessful · APBS return",
+      "label": "Mapped account is dormant / inactive (reactivable)",
+      "label_hi": "लिंक्ड खाता निष्क्रिय (डोरमेंट) है — इसे फिर से सक्रिय किया जा सकता है",
+      "description": "Account exists but has had no customer-initiated transaction for a long period, so banks mark it dormant/inoperative and reject DBT credits. Unlike a closed account it can be reactivated with a small deposit/withdrawal and KYC.",
+      "severity": "HIGH",
+      "signals": [
+        {"id": "SIG_MAPPER_INACTIVE", "weight": 2, "text": "NPCI mapper status is not 'Enabled for DBT'"},
+        {"id": "SIG_BANK_DORMANT", "weight": 3, "text": "Bank reports account dormant/inoperative"},
+        {"id": "SIG_ACCOUNT_RECENT_ACTIVITY", "weight": 3, "text": "Passbook evidence shows account activity after the alleged closure — account is dormant, not closed"}
+      ]
+    },
+    "AADHAAR_NOT_SEEDED": {
+      "code": "AADHAAR_NOT_SEEDED",
+      "code_ref": "UID never enabled for DBT",
+      "label": "Aadhaar not seeded in NPCI mapper for DBT",
+      "label_hi": "आधार एनपीसीआई मैपर में डीबीटी के लिए सीड नहीं है",
+      "description": "Aadhaar is not mapped to any bank account as the DBT destination ('UID never enabled for DBT'). Seeding request must be made at the preferred bank branch (Annexure I).",
+      "severity": "CRITICAL",
+      "signals": [
+        {"id": "SIG_MAPPER_NOT_SEEDED", "weight": 3, "text": "NPCI mapper shows no active DBT mapping"},
+        {"id": "SIG_APBS_RETURNED", "weight": 2, "text": "APBS returned the credit — no mapping"}
+      ]
+    },
+    "PAYMENT_MAPPED_TO_OTHER_ACCOUNT": {
+      "code": "PAYMENT_MAPPED_TO_OTHER_ACCOUNT",
+      "code_ref": "NPCI mapper last-seeded-wins rule",
+      "label": "DBT is being routed to a different bank account than expected",
+      "label_hi": "भुगतान किसी दूसरे बैंक खाते में जा रहा है",
+      "description": "DBT follows the LATEST Aadhaar-seeded account in the NPCI mapper. A newer seeding request has silently redirected payments to another account.",
+      "severity": "HIGH",
+      "signals": [
+        {"id": "SIG_MULTIPLE_MAPPINGS", "weight": 3, "text": "Mapper shows more than one known account for this Aadhaar"},
+        {"id": "SIG_SCHEME_CREDITED_ELSEWHERE", "weight": 3, "text": "Scheme portal shows credit to an account different from the beneficiary's stated account"}
+      ]
+    },
+    "ACCOUNT_VALIDATION_FAILED": {
+      "code": "ACCOUNT_VALIDATION_FAILED",
+      "code_ref": "PFMS Account Validation Failed",
+      "label": "Account validation failed at PFMS/bank",
+      "label_hi": "खाता सत्यापन विफल रहा",
+      "description": "PFMS could not validate the account: name, account number or IFSC in the application does not match bank records, or the bank is not mapped.",
+      "severity": "HIGH",
+      "signals": [
+        {"id": "SIG_PFMS_VALIDATION_FAILED", "weight": 2, "text": "PFMS returned ACCOUNT_VALIDATION_FAILED"},
+        {"id": "SIG_NAME_MISMATCH_DOCS", "weight": 2, "text": "Identity graph shows name fields differ — the most common trigger of account validation failure"}
+      ]
+    },
+    "INVALID_IFSC": {
+      "code": "INVALID_IFSC",
+      "code_ref": "PFMS bank-not-mapped / invalid IFSC",
+      "label": "Invalid or outdated IFSC (bank merger/branch change)",
+      "label_hi": "आईएफएससी कोड गलत या पुराना है",
+      "description": "IFSC in the scheme record belongs to a merged/restructured branch. Payment cannot be routed until the scheme record is updated.",
+      "severity": "MEDIUM",
+      "signals": [
+        {"id": "SIG_IFSC_INVALID", "weight": 3, "text": "IFSC flagged invalid/unmapped by PFMS/bank source"},
+        {"id": "SIG_BANK_MERGER", "weight": 1, "text": "Passbook shows pre-merger IFSC"}
+      ]
+    },
+    "EKYC_PENDING": {
+      "code": "EKYC_PENDING",
+      "code_ref": "Scheme eKYC mandate",
+      "label": "Mandatory eKYC pending with the scheme",
+      "label_hi": "योजना में ई-केवाईसी लंबित है",
+      "description": "Scheme (e.g. PM-KISAN) withholds installments until OTP/face eKYC is completed. Fix at portal/CSC — no bank visit needed for this cause.",
+      "severity": "MEDIUM",
+      "signals": [
+        {"id": "SIG_EKYC_PENDING", "weight": 4, "text": "Scheme portal reports eKYC pending/not done"}
+      ]
+    },
+    "LIFE_CERTIFICATE_PENDING": {
+      "code": "LIFE_CERTIFICATE_PENDING",
+      "code_ref": "Jeevan Pramaan annual life certificate",
+      "label": "Annual life certificate not submitted (pension stoppage risk)",
+      "label_hi": "वार्षिक जीवन प्रमाणपत्र जमा नहीं हुआ है",
+      "description": "Pensions are stopped every year if the life certificate is not submitted before the deadline (typically 30 November). This is a SEPARATE stoppage risk and must be scheduled even when another cause explains the current failure.",
+      "severity": "HIGH",
+      "signals": [
+        {"id": "SIG_PENSION_SCHEME", "weight": 1, "text": "Case is a pension scheme"},
+        {"id": "SIG_LIFE_CERT_PENDING", "weight": 3, "text": "Scheme portal shows life certificate pending"}
+      ]
+    },
+    "APBS_PAYMENT_RETURNED": {
+      "code": "APBS_PAYMENT_RETURNED",
+      "code_ref": "APBS return to sponsor",
+      "label": "Payment released but returned by the payment rail",
+      "label_hi": "भुगतान वापस लौट गया है",
+      "description": "Scheme and PFMS show the payment as processed, but APBS returned it (reason code attached). Usually downstream of mapper/account problems.",
+      "severity": "HIGH",
+      "signals": [
+        {"id": "SIG_APBS_RETURNED", "weight": 3, "text": "APBS status: returned"}
+      ]
+    },
+    "SCHEME_NOT_RELEASED": {
+      "code": "SCHEME_NOT_RELEASED",
+      "code_ref": "Scheme disbursement pending",
+      "label": "Scheme has not released the payment yet",
+      "label_hi": "योजना ने अभी भुगतान जारी नहीं किया है",
+      "description": "Failure is at the scheme's own approval/disbursement stage (application pending, eligibility verification, sanction order). Bank-side fixes will not help.",
+      "severity": "MEDIUM",
+      "signals": [
+        {"id": "SIG_SCHEME_PENDING", "weight": 3, "text": "Scheme portal shows payment pending/not released"}
+      ]
+    },
+    "OTHER": {
+      "code": "OTHER",
+      "code_ref": "Unclassified",
+      "label": "Unclassified failure — needs manual evidence",
+      "label_hi": "कारण स्पष्ट नहीं — और प्रमाण चाहिए",
+      "description": "Signals do not match a documented cause with confidence. Plan focuses on evidence collection and standard escalation.",
+      "severity": "MEDIUM",
+      "signals": []
+    }
+  }
+}

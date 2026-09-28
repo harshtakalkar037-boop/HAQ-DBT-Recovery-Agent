@@ -1,0 +1,94 @@
+{
+  "version": "1.0",
+  "description": "Curated corpus of REAL public guidance about India's DBT payment pipeline, with source URLs. Retrieved by KHOJ's PublicDocsTool (retrieval over official/public guidance). Content summarised from official and public sources; consult the linked sources for authoritative text.",
+  "entries": [
+    {
+      "id": "KB-NPCI-01",
+      "title": "NPCI Aadhaar mapper — last-seeded account wins",
+      "tags": ["mapper", "seeding", "wrong account", "payment mapped elsewhere", "redirected"],
+      "content": "For Aadhaar-based DBT (APBS), money follows the LATEST Aadhaar-seeded account in the NPCI mapper — not the account the beneficiary assumes is primary. Opening a new bank account and seeding it silently redirects all government credits. Only one account is active per Aadhaar at a time. Fix: submit an Aadhaar seeding request at the preferred bank branch so that account becomes the newest mapper entry.",
+      "source": "NPCI — National Payments Corporation of India (public guidance)",
+      "url": "https://www.npci.org.in/"
+    },
+    {
+      "id": "KB-NPCI-02",
+      "title": "B06 name mismatch blocks seeding",
+      "tags": ["name mismatch", "B06", "validation", "seeding rejected"],
+      "content": "If the beneficiary name in bank records does not match the Aadhaar name character-by-character, the seeding request is rejected with a B06-style name mismatch. The bank record (or Aadhaar) must be corrected FIRST; only then will the mapper accept the seeding. Even spacing or spelling variants ('SHANTA BAI' vs 'SHANTABAI') can fail validation.",
+      "source": "NPCI / public DBT implementation guidance",
+      "url": "https://www.npci.org.in/"
+    },
+    {
+      "id": "KB-UIDAI-01",
+      "title": "Aadhaar seeding vs Aadhaar linking (KYC)",
+      "tags": ["seeding", "KYC", "not enabled for DBT", "aadhaar not seeded"],
+      "content": "Linking an Aadhaar to a bank account for KYC is NOT the same as seeding it in the NPCI mapper for DBT. A customer can have Aadhaar linked at a bank ('KYC only') while the mapper shows 'UID never enabled for DBT'. Seeding requires a specific request (often on the bank's Annexure I / DBT linkage form) that the bank pushes to the NPCI mapper; reflection typically takes 24-48 hours after UIDAI validation.",
+      "source": "UIDAI — Unique Identification Authority of India (public guidance)",
+      "url": "https://uidai.gov.in/"
+    },
+    {
+      "id": "KB-PFMS-01",
+      "title": "PFMS payment statuses and 'Account Validation Failed'",
+      "tags": ["account validation failed", "PFMS", "payment failed", "scholarship", "rejected"],
+      "content": "PFMS (Public Financial Management System) routes many scheme payments. 'Account Validation Failed' means the name, account number or IFSC in the scheme application does not match bank records, or the bank is not mapped. It is the most common DBT payment failure at the PFMS stage. Funds for returned/rejected payments go back to the government account and must be re-processed after the defect is fixed.",
+      "source": "PFMS — Public Financial Management System (official portal)",
+      "url": "https://pfms.nic.in/"
+    },
+    {
+      "id": "KB-APBS-01",
+      "title": "APBS return codes and the URN",
+      "tags": ["APBS", "returned", "URN", "return code", "payment returned"],
+      "content": "Every DBT credit processed through the Aadhaar Payment Bridge (APBS) carries a URN (User Reference Number). When a credit is returned (e.g. return code 25 — invalid/inactive account), the funds revert to the sponsor/government. Quoting the URN in every complaint lets the bank trace the exact transaction; without it branches often say 'no record found'.",
+      "source": "DBT Mission / APBS public documentation",
+      "url": "https://dbtbharat.gov.in/"
+    },
+    {
+      "id": "KB-ACCOUNT-01",
+      "title": "Dormant (inoperative) vs closed accounts",
+      "tags": ["dormant", "inactive", "closed", "reactivate", "inoperative"],
+      "content": "Banks mark accounts with no customer-initiated transaction for a long period (commonly 12+ months) as dormant/inoperative. Dormant accounts often reject DBT credits — but they can be REACTIVATED with a small customer transaction plus fresh KYC. A closed account cannot receive credits at all; the mapper must be re-pointed to an active account and returned instalments re-processed. Evidence of recent activity on the account proves it is dormant, not closed.",
+      "source": "RBI — Reserve Bank of India, inoperative account guidance (public)",
+      "url": "https://www.rbi.org.in/"
+    },
+    {
+      "id": "KB-ESCALATION-01",
+      "title": "Escalation ladder for a stuck DBT payment",
+      "tags": ["escalation", "CPGRAMS", "RTI", "grievance", "nodal officer", "ombudsman"],
+      "content": "Documented escalation path: (1) bank branch with prepared documents and acknowledgement; (2) bank nodal/grievance officer (T+7); (3) scheme nodal officer with URN references; (4) CPGRAMS grievance on pgportal.gov.in (T+15 if unanswered); (5) RTI to the scheme's Public Information Officer asking which account received each credit, with first appeal if the reply is evasive (T+30). Keep one file with every acknowledgement and complaint number.",
+      "source": "CPGRAMS — Centralised Public Grievance Redress and Monitoring System",
+      "url": "https://pgportal.gov.in/"
+    },
+    {
+      "id": "KB-RTI-01",
+      "title": "RTI for payment trace",
+      "tags": ["RTI", "which account", "trace", "PIO"],
+      "content": "An RTI application to the scheme department's PIO can ask: which account number received the credit associated with a given URN, the date of credit, the current Aadhaar seeding status recorded in the pipeline, the exact return reason code, and the prescribed time limit for re-processing returned instalments. Application fee is ₹10; the reply is due in 30 days.",
+      "source": "RTI Online — Government of India",
+      "url": "https://rtionline.gov.in/"
+    },
+    {
+      "id": "KB-PENSION-01",
+      "title": "Annual life certificate (Jeevan Pramaan)",
+      "tags": ["life certificate", "pension", "jeevan pramaan", "november", "stopped"],
+      "content": "Pensioners must submit an annual life certificate, typically before 30 November, or the pension is stopped. This is a SEPARATE stoppage risk from mapper/account failures. Life certificates can be submitted at the bank, via Jeevan Pramaan digital authentication, or through doorstep services where available.",
+      "source": "Jeevan Pramaan — Government of India",
+      "url": "https://jeevanpramaan.gov.in/"
+    },
+    {
+      "id": "KB-PMKISAN-01",
+      "title": "PM-KISAN instalment holds",
+      "tags": ["pm kisan", "ekyc", "installment", "kist", "aadhaar not seeded"],
+      "content": "PM-KISAN instalments are withheld when mandatory eKYC is pending (OTP or face auth at the portal/CSC) or when the beneficiary's Aadhaar is not seeded for DBT ('UID never enabled'). Beneficiary status and instalment details are published on the official PM-KISAN portal. Fixing eKYC and bank seeding are independent steps — both may be required.",
+      "source": "PM-KISAN — official scheme portal",
+      "url": "https://pmkisan.gov.in/"
+    },
+    {
+      "id": "KB-DBT-01",
+      "title": "How India's DBT pipeline works",
+      "tags": ["pipeline", "how it works", "scheme", "treasury", "APBS", "mapper", "bank"],
+      "content": "A DBT payment travels: Scheme sanction → Treasury/PFMS processing → APBS routing (against Aadhaar) → NPCI mapper lookup (which bank account) → bank CBS credit. A failure at ANY stage leaves a different trace: scheme 'pending', PFMS 'validation failed', APBS 'returned', mapper 'not seeded/inactive', or bank 'credit unsuccessful'. Diagnosing the stage is the key to the correct fix.",
+      "source": "DBT Mission — Direct Benefit Transfer, Government of India",
+      "url": "https://dbtbharat.gov.in/"
+    }
+  ]
+}
