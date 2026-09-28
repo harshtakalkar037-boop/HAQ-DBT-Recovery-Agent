@@ -21,7 +21,7 @@ HAQ is an **Agentic AI case-resolution system** for Direct Benefit Transfer (DBT
 <br/><br/>
 
 **<a href="https://github.com/harshtakalkar037-boop/HAQ-DBT-Recovery-Agent">GitHub</a>** &nbsp;·&nbsp;
-**[Live Demo — coming soon]** &nbsp;·&nbsp;
+**[Live Demo](https://haq-azure.vercel.app/)** &nbsp;·&nbsp;
 **[Demo Video — coming soon]** &nbsp;·&nbsp;
 **[Pitch Deck — coming soon]**
 
