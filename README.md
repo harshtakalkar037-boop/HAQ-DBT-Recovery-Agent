@@ -26,7 +26,7 @@ HAQ is an **Agentic AI case-resolution system** for Direct Benefit Transfer (DBT
 **[Pitch Deck — View / Download](docs/pitch_deck/HAQ-Pitch-Deck-Bharat-Agentic-2026.pptx)**
 
 **[Website Screenshots — View](docs/website_screenshots/README.md)** &nbsp;·&nbsp;
-**[Demo Video — coming soon]**
+**[Demo Folder](demo/README.md)** &nbsp;·&nbsp; **[Demo Video — coming soon]**
 
 <br/>
 
@@ -433,7 +433,9 @@ backend/
 requirements.txt
 run.sh                  # Start the app (uvicorn backend.main:app)
 README.md
-DEMO-SCRIPT.md          # Minute-by-minute 3-minute judge demo script
+demo/
+├── README.md             # Judge-facing demo assets and walkthrough
+└── DEMO-SCRIPT.md        # Minute-by-minute 3-minute judge demo script
 ```
 
 ---
