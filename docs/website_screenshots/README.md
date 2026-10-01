@@ -1,23 +1,46 @@
-# Website Screenshots
+# HAQ Website Screenshots
 
-This folder contains screenshots of websites and web resources referenced, used, or demonstrated by HAQ.
+Screenshots documenting the HAQ — DBT Payment Recovery Agent web application and its hosted API documentation.
 
-## Purpose
+## Screenshots
 
-Screenshots are stored here for:
-- documenting external websites and public resources used by the project
-- showing the source/reference pages behind HAQ's evidence workflow
-- preserving visual proof of relevant web resources for the hackathon submission
-- helping reviewers understand how public information and source transparency are represented
+### 1. Home / Landing Page
+![HAQ Home](01-home.png)
 
-## Suggested organization
+Shows the HAQ value proposition, DBT payment-chain visualization, agent activity, and demo cases.
 
-Use descriptive filenames, for example:
-- `ifsc-lookup-source.png`
-- `pincode-lookup-source.png`
-- `dbt-public-guidance.png`
-- `aikart-hackathon-page.png`
-- `haq-live-demo.png`
-- `haq-api-swagger.png`
+### 2. Case Intake
+![Case Intake](02-case-intake.png)
 
-Only add screenshots that are relevant to the project or its documented sources. Do not include passwords, API keys, personal information, or other sensitive data.
+Shows the citizen case intake flow, language support, beneficiary details, document upload, and consent gate.
+
+### 3. Filled Golden Demo Intake
+![Filled Golden Demo Intake](03-case-intake-filled.png)
+
+Shows the Shantabai Pawar pension case being prepared for the Golden Demo workflow.
+
+### 4. Case Overview
+![Case Overview](04-case-overview.png)
+
+Shows the completed 8-agent workflow, diagnosis, evidence chain, payment status, and watchdog state.
+
+### 5. How HAQ Works
+![How HAQ Works](05-how-haq-works.png)
+
+Shows the eight specialized agents and the trust, source-transparency, hybrid-AI, and privacy principles.
+
+### 6. Sources & Data Transparency
+![Sources and Data Transparency](06-sources-transparency.png)
+
+Shows which sources are demo/simulated, live public sources, and public DBT guidance.
+
+### 7. Hosted API Documentation
+![API Documentation](07-api-docs.png)
+
+Shows the FastAPI/OpenAPI documentation, including the hosted `POST /api/aikart/run` endpoint.
+
+## Notes
+
+- Screenshots document the project interface and demo workflow.
+- Demo/simulated institutional sources are explicitly labelled in the application.
+- No passwords, API keys, or private credentials are included.
