@@ -177,6 +177,31 @@ def create_case(payload: CaseIn):
     return {"id": case_id, "status": "INTAKE"}
 
 
+@app.post("/api/cases/{case_id}/run")
+def run_case(case_id: str):
+    """Run the initial agent workflow synchronously.
+
+    Vercel serverless runtimes may terminate daemon background threads after the
+    HTTP response, so the hosted API explicitly keeps the workflow inside this
+    request. The frontend calls this endpoint immediately after case creation.
+    """
+    case = store.get_case(case_id)
+    if not case:
+        raise HTTPException(404, "case not found")
+    if case.get("status") not in ("INTAKE", "INVESTIGATING"):
+        return {"id": case_id, "status": case.get("status"), "message": "Case is already running or completed."}
+    try:
+        orch.run_initial(case_id)
+    except Exception as e:
+        case = store.get_case(case_id) or case
+        case["status"] = "ERROR"
+        case["error"] = str(e)
+        store.update_case(case)
+        raise HTTPException(500, f"Agent workflow failed: {e}")
+    case = store.get_case(case_id)
+    return {"id": case_id, "status": case.get("status", "WATCHDOG")}
+
+
 @app.get("/api/cases")
 def list_cases():
     return store.list_cases()
