@@ -57,6 +57,18 @@ class SimulateIn(BaseModel):
     action: str
 
 
+class AikartRunIn(BaseModel):
+    """Public aiKart sandbox input.
+
+    The marketplace only needs a natural-language problem statement. HAQ uses
+    the seeded synthetic pension case as the institutional demo context and
+    runs the full workflow synchronously before returning the agent outcome.
+    """
+    message: str
+    language: str = "hi-en"
+    consent: bool = True
+
+
 def _public_case(case: dict) -> dict:
     """API view with the privacy layer applied (masked Aadhaar/account)."""
     return mask_case_view(case)
@@ -119,6 +131,59 @@ def delete_case(case_id: str):
 @app.get("/api/catalog")
 def catalog():
     return SEED_CATALOG
+
+
+@app.post("/api/aikart/run")
+def aikart_run(payload: AikartRunIn):
+    """aiKart-compatible agent endpoint.
+
+    Accepts one natural-language problem statement and executes HAQ's complete
+    stateful agent workflow. Institutional beneficiary-status adapters remain
+    explicitly DEMO/simulated; the returned diagnosis and next action are read
+    from the resulting case state rather than hard-coded.
+    """
+    message = (payload.message or "").strip()
+    if not message:
+        raise HTTPException(400, "message is required")
+
+    result = create_case(CaseIn(
+        seed_id="pension",
+        narrative=message,
+        language=payload.language or "hi-en",
+        documents=[],
+        consent=payload.consent,
+    ))
+    case_id = result["id"]
+    case = store.get_case(case_id)
+    if not case:
+        raise HTTPException(500, "case was created but could not be loaded")
+
+    diagnosis = case.get("diagnosis") or {}
+    watchdog = case.get("watchdog") or {}
+    followup = case.get("followup") or {}
+    payment_verified = bool(watchdog.get("payment_verified"))
+    status = case.get("status", "WATCHDOG")
+
+    return {
+        "success": True,
+        "case_id": case_id,
+        "status": status,
+        "diagnosis": diagnosis.get("root_cause_code"),
+        "secondary_diagnosis": diagnosis.get("secondary_cause_code"),
+        "confidence": diagnosis.get("confidence"),
+        "payment_status": "VERIFIED" if payment_verified else "BLOCKED",
+        "next_action": followup.get("next_action") or watchdog.get("next_action"),
+        "agentic_workflow": [
+            "SAMVAAD",
+            "KHOJ",
+            "NIDAAN",
+            "YOJNA",
+            "KARM",
+            "NYAYA",
+            "SATYAPAN",
+            "ANUSARAN",
+        ],
+    }
 
 
 @app.post("/api/cases")
