@@ -174,7 +174,16 @@ def create_case(payload: CaseIn):
                     "text": "Documents will be used only to analyze this case and prepare the requested actions."},
     }
     store.create_case(case)
-    return {"id": case_id, "status": "INTAKE"}
+    try:
+        orch.run_initial(case_id)
+    except Exception as e:
+        failed = store.get_case(case_id) or case
+        failed["status"] = "ERROR"
+        failed["error"] = str(e)
+        store.update_case(failed)
+        raise HTTPException(500, f"Agent workflow failed: {e}")
+    final_case = store.get_case(case_id) or case
+    return {"id": case_id, "status": final_case.get("status", "WATCHDOG")}
 
 
 @app.post("/api/cases/{case_id}/run")
