@@ -174,8 +174,7 @@ def create_case(payload: CaseIn):
                     "text": "Documents will be used only to analyze this case and prepare the requested actions."},
     }
     store.create_case(case)
-    orch.start_initial(case)
-    return {"id": case_id, "status": "INTAKE"}
+return {"id": case_id, "status": "INTAKE"}
 
 
 @app.get("/api/cases")
