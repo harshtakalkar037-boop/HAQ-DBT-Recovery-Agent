@@ -436,9 +436,6 @@ docs/
 └── website_screenshots/
     ├── README.md
     └── 01–07 project screenshots
-demo/
-├── README.md              # Judge-facing demo assets and walkthrough
-└── DEMO-SCRIPT.md         # Minute-by-minute judge demo script
 app.py                     # Vercel entrypoint
 vercel.json                # Vercel deployment configuration
 requirements.txt
@@ -465,7 +462,6 @@ chmod +x run.sh
 
 Then open **http://localhost:8000** and click **▶ Run the Golden Demo** — the Shantabai Pawar pension case is seeded in the app and runs the full workflow, including the ⭐ re-planning moment.
 
-For the judge-facing walkthrough (what to click and say at each second), see **[demo/DEMO-SCRIPT.md](./demo/DEMO-SCRIPT.md)**.
 
 ---
 
