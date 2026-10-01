@@ -164,6 +164,8 @@ class Orchestrator:
                 {"OK": "✓", "FAIL": "✕", "WARN": "●"}[e["status"]] + " " + e["source_label"].split(" —")[0]
                 for e in case["evidence"][:5])
             self._emit(case_id, "KHOJ", "WORK", f"Evidence chain: {chain}", status="WORK")
+            self._emit(case_id, "KHOJ", "DONE",
+                       "Evidence chain complete — required payment-path sources checked.", status="DONE")
             self._save(case)
             time.sleep(PAUSE)
 
