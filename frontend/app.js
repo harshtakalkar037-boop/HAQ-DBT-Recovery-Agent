@@ -270,6 +270,8 @@ const App = (() => {
       const res = await post('/api/cases', { seed_id: state.pendingSeed, narrative, documents: docs, consent: true });
       clearBanner();
       openCase(res.id);
+      banner('info', 'Case created. HAQ is starting the agent workflow…');
+      await post('/api/cases/' + res.id + '/run', {});
     } catch (err) { banner('replan', 'Could not start the case: ' + err.message); }
   }
 
