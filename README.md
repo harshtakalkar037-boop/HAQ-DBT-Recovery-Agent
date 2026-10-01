@@ -26,7 +26,6 @@ HAQ is an **Agentic AI case-resolution system** for Direct Benefit Transfer (DBT
 **[Pitch Deck — View / Download](docs/pitch_deck/HAQ-Pitch-Deck-Bharat-Agentic-2026.pptx)**
 
 **[Website Screenshots — View](docs/website_screenshots/README.md)** &nbsp;·&nbsp;
-**[Demo Folder](demo/README.md)** &nbsp;·&nbsp; **[Demo Video — coming soon]**
 
 <br/>
 
