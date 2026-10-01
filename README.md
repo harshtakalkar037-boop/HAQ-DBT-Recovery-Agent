@@ -412,30 +412,38 @@ Beneficiary-level institutional status normally requires authenticated / authori
 
 ```
 frontend/
-├── index.html          # Case console UI (intake, command center, document center)
-├── styles.css          # GovTech design system, accessibility modes
-└── app.js              # UI state, agent board, tool-trace rendering, i18n EN/हिं
+├── index.html              # Case console UI
+├── styles.css              # GovTech design system and accessibility modes
+└── app.js                  # UI state, agent board, tool trace, i18n
 backend/
-├── main.py             # FastAPI app, REST API, consent gate, masking, case CRUD
-├── orchestrator.py     # Stateful agent orchestrator + structured case events
-├── agents.py           # SAMVAAD · KHOJ · NIDAAN · YOJNA · KARM · SATYAPAN · ANUSARAN
-├── extract.py          # Document field extraction, identity graph, mismatch detection
-├── adapters.py         # GovTool adapter interface: LIVE/PUBLIC tools + DEMO adapters
-├── core.py             # CaseStore, NYAYA rules engine, masking helpers
-├── docs_templates.py   # KARM fixed templates (action letters, RTI, CPGRAMS…)
-├── seed.py             # Synthetic demo cases incl. the Shantabai golden case
+├── main.py                # FastAPI app, REST API, consent gate, masking, case CRUD
+├── orchestrator.py        # Stateful agent orchestration + structured case events
+├── agents.py              # Specialized HAQ agents
+├── extract.py             # Document extraction, identity graph, mismatch detection
+├── adapters.py             # LIVE/PUBLIC tools + DEMO institutional adapters
+├── core.py                # CaseStore, NYAYA rules engine, masking helpers
+├── docs_templates.py      # KARM fixed action-document templates
+├── seed.py                # Synthetic demo cases including the Shantabai golden case
 ├── rules/
-│   ├── taxonomy.json   # Deterministic failure taxonomy + scoring signals
-│   ├── policy.json     # Deadlines, escalation ladder, guardrails
-│   └── playbooks.json  # Scheme playbooks with dependency-ordered steps
+│   ├── taxonomy.json      # Deterministic failure taxonomy + scoring signals
+│   ├── policy.json        # Deadlines, escalation ladder, guardrails
+│   └── playbooks.json     # Scheme playbooks with dependency-ordered steps
 └── kb/
-    └── dbt_knowledge.json   # Curated public DBT guidance with cited source URLs
-requirements.txt
-run.sh                  # Start the app (uvicorn backend.main:app)
-README.md
+    └── dbt_knowledge.json # Curated public DBT guidance with cited source URLs
+docs/
+├── pitch_deck/
+│   └── HAQ-Pitch-Deck-Bharat-Agentic-2026.pptx
+└── website_screenshots/
+    ├── README.md
+    └── 01–07 project screenshots
 demo/
-├── README.md             # Judge-facing demo assets and walkthrough
-└── DEMO-SCRIPT.md        # Minute-by-minute 3-minute judge demo script
+├── README.md              # Judge-facing demo assets and walkthrough
+└── DEMO-SCRIPT.md         # Minute-by-minute judge demo script
+app.py                     # Vercel entrypoint
+vercel.json                # Vercel deployment configuration
+requirements.txt
+run.sh                     # Local app startup
+README.md
 ```
 
 ---
@@ -457,7 +465,7 @@ chmod +x run.sh
 
 Then open **http://localhost:8000** and click **▶ Run the Golden Demo** — the Shantabai Pawar pension case is seeded in the app and runs the full workflow, including the ⭐ re-planning moment.
 
-For the judge-facing walkthrough (what to click and say at each second), see **[DEMO-SCRIPT.md](./DEMO-SCRIPT.md)**.
+For the judge-facing walkthrough (what to click and say at each second), see **[demo/DEMO-SCRIPT.md](./demo/DEMO-SCRIPT.md)**.
 
 ---
 
