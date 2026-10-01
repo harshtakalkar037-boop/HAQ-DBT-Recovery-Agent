@@ -4,7 +4,7 @@ const App = (() => {
     view: 'landing', caseId: null, case: null, events: [], lastSeq: 0,
     agents: {}, meta: null, catalog: [], tab: 'overview', planView: null,
     intakeDocs: [], poll: null, pollFast: true, currentDoc: null,
-    lang: 'en', zoom: 0, pendingSeed: null, recognition: null,
+    lang: 'en', zoom: 0, pendingSeed: null, recognition: null, submitting: false,
   };
 
   const AGENT_ORDER = ['SAMVAAD', 'KHOJ', 'NIDAAN', 'YOJNA', 'KARM', 'NYAYA', 'SATYAPAN', 'ANUSARAN'];
@@ -258,8 +258,12 @@ const App = (() => {
 
   // ---------------------------------------------------------------- consent + submit
   async function submitCase() {
+    if (state.submitting) return;
+    state.submitting = true;
+    clearBanner();
     const consent = document.getElementById('in-consent').checked;
     if (!consent) {
+      state.submitting = false;
       banner('replan', 'Please accept the privacy notice before HAQ can process your documents.');
       document.getElementById('consent-box').scrollIntoView({ behavior: 'smooth' });
       return;
@@ -269,12 +273,18 @@ const App = (() => {
     try {
       const res = await post('/api/cases', { seed_id: state.pendingSeed, narrative, documents: docs, consent: true });
       clearBanner();
+      state.submitting = false;
       openCase(res.id);
-    } catch (err) { banner('replan', 'Could not start the case: ' + err.message); }
+    } catch (err) {
+      state.submitting = false;
+      banner('replan', 'Could not start the case: ' + err.message);
+    }
   }
 
   // ---------------------------------------------------------------- polling
   function openCase(id) {
+    state.submitting = false;
+    clearBanner();
     state.caseId = id; state.lastSeq = 0; state.events = []; state.agents = {};
     AGENT_ORDER.forEach(a => state.agents[a] = { status: 'waiting', detail: 'Waiting…' });
     state.agents.NYAYA.detail = 'Policy engine — ordering, deadlines, guardrails';
@@ -298,6 +308,8 @@ const App = (() => {
         api(`/api/cases/${state.caseId}/events?after=${state.lastSeq}`),
       ]);
       state.case = c;
+      // A successful case fetch is authoritative: clear any stale submit/runtime banner.
+      if (c && c.id === state.caseId) clearBanner();
       if (ev.events.length) {
         ev.events.forEach(e => { state.events.push(e); state.lastSeq = e.seq; applyEvent(e); });
       } else if (['WATCHDOG', 'CLOSED'].includes(c.status) && state.pollFast) {
