@@ -22,6 +22,7 @@ HAQ is an **Agentic AI case-resolution system** for Direct Benefit Transfer (DBT
 
 **<a href="https://github.com/harshtakalkar037-boop/HAQ-DBT-Recovery-Agent">GitHub</a>** &nbsp;·&nbsp;
 **[Live Demo](https://haq-azure.vercel.app/)** &nbsp;·&nbsp;
+**[API Docs](https://haq-azure.vercel.app/docs)** &nbsp;·&nbsp;
 **[Demo Video — coming soon]** &nbsp;·&nbsp;
 **[Pitch Deck — coming soon]**
 
@@ -33,7 +34,7 @@ HAQ is an **Agentic AI case-resolution system** for Direct Benefit Transfer (DBT
 
 ---
 
-**Sections:** [The Problem](#the-problem) · [The Gap](#the-gap) · [What HAQ Does](#what-haq-does) · [Why HAQ is not a chatbot](#why-haq-is-not-a-chatbot) · [Golden Demo](#golden-demo) · [Architecture](#architecture) · [Technical Stack](#technical-stack) · [Source Transparency](#source-transparency) · [Privacy & Security](#privacy--security) · [Repository Structure](#repository-structure) · [Quick Start](#quick-start)
+**Sections:** [The Problem](#the-problem) · [The Gap](#the-gap) · [What HAQ Does](#what-haq-does) · [Why HAQ is not a chatbot](#why-haq-is-not-a-chatbot) · [Golden Demo](#golden-demo) · [Architecture](#architecture) · [Technical Stack](#technical-stack) · [Hosted Agent API](#hosted-agent-api) · [Source Transparency](#source-transparency) · [Privacy & Security](#privacy--security) · [Repository Structure](#repository-structure) · [Quick Start](#quick-start)
 
 ---
 
@@ -170,7 +171,7 @@ Evidence → Investigate → Diagnose → Plan → Act → Verify
 
 What makes HAQ genuinely **agentic**:
 
-1. **Stateful workflow** — the case persists across turns, sessions and re-opens
+1. **Stateful workflow** — case state is persisted in SQLite locally and can be reopened and continued in the same application runtime
 2. **Multiple specialized agents** — SAMVAAD, KHOJ, NIDAAN, YOJNA, KARM, SATYAPAN, ANUSARAN with distinct responsibilities
 3. **Tool use** — real tool calls to public directories and institutional adapters, visible in a tool-trace board
 4. **Structured case state** — agents exchange structured state (case files, evidence, diagnoses, plans), not chat messages
@@ -273,7 +274,7 @@ flowchart TD
 
     AN -. "new evidence → re-plan v2" .-> N
 
-    T["TOOLS / EVIDENCE SOUROURCES<br/>LIVE / PUBLIC: IFSC_LOOKUP · PINCODE_LOOKUP · DBT_PUBLIC_DOCS<br/>DEMO: SCHEME_STATUS · PFMS_STATUS · APBS_STATUS · NPCI_MAPPER · BANK_CBS"]
+    T["TOOLS / EVIDENCE SOURCES<br/>LIVE / PUBLIC: IFSC_LOOKUP · PINCODE_LOOKUP · DBT_PUBLIC_DOCS<br/>DEMO: SCHEME_STATUS · PFMS_STATUS · APBS_STATUS · NPCI_MAPPER · BANK_CBS"]
     K <--> T
 
     NY["NYAYA<br/>deterministic policy · rules · guardrails<br/>taxonomy · ordering · deadlines · source of truth"]
@@ -290,7 +291,7 @@ flowchart TD
 - **Agents exchange structured state rather than chat messages** — identity graphs, evidence chains, diagnoses, plan objects, verification reports.
 - **The orchestrator routes the case and records structured case events** — every tool call, decision and state change is an inspectable event in the case log (visible live in the app's Agent Activity / Tool-Trace board).
 - **NYAYA** is the deterministic policy / rules / guardrail layer — the source of truth for critical decisions.
-- **CASE MEMORY** is the persistent shared case state — cases can be re-opened and continued exactly where they stopped.
+- **CASE MEMORY** is the shared case state stored in SQLite. In the local application it can be reopened and continued; the Vercel prototype uses temporary runtime storage and should not be treated as permanent production persistence.
 
 ---
 
@@ -305,7 +306,62 @@ flowchart TD
 | Data | SQLite + JSON knowledge/rules |
 | Public integrations | Public IFSC directory, public postal pincode directory, DBT public knowledge |
 | Institutional adapters | DEMO: Scheme Status, PFMS Status, APBS Status, NPCI Mapper, Bank CBS |
-| Optional language layer | Groq / Gemini when configured |
+| Optional language layer | Groq / Gemini when configured; deployed demo uses a deterministic language layer |
+
+---
+
+## Hosted Agent API
+
+HAQ exposes a hosted FastAPI endpoint for external integrations and the aiKart submission flow.
+
+**Endpoint**
+
+```text
+POST https://haq-azure.vercel.app/api/aikart/run
+```
+
+**Request**
+
+```json
+{
+  "message": "My old age pension has not been credited for 3 months.",
+  "language": "hi-en",
+  "consent": true
+}
+```
+
+**Response**
+
+```json
+{
+  "success": true,
+  "case_id": "HAQ-XXXXXXXX",
+  "status": "WATCHDOG",
+  "diagnosis": "CLOSED_MAPPED_ACCOUNT",
+  "secondary_diagnosis": "NAME_MISMATCH",
+  "confidence": 0.8,
+  "payment_status": "BLOCKED",
+  "next_action": "Submit annual life certificate (Jeevan Pramaan) before the 30 November deadline",
+  "agentic_workflow": [
+    "SAMVAAD",
+    "KHOJ",
+    "NIDAAN",
+    "YOJNA",
+    "KARM",
+    "NYAYA",
+    "SATYAPAN",
+    "ANUSARAN"
+  ]
+}
+```
+
+> The `case_id` is generated dynamically for each request. The diagnosis and next action are read from the resulting case state rather than hard-coded into the API response.
+
+**Interactive API documentation:** https://haq-azure.vercel.app/docs
+
+### Deployment note
+
+The hackathon Vercel prototype uses temporary runtime storage for writable application data. SQLite is suitable for the prototype demonstration, but it should not be treated as permanent production storage across arbitrary serverless instances. A production deployment would use a durable external database.
 
 ---
 
@@ -361,7 +417,7 @@ backend/
 ├── main.py             # FastAPI app, REST API, consent gate, masking, case CRUD
 ├── orchestrator.py     # Stateful agent orchestrator + structured case events
 ├── agents.py           # SAMVAAD · KHOJ · NIDAAN · YOJNA · KARM · SATYAPAN · ANUSARAN
-├── extract.py          # Document/OCR extraction, identity graph, mismatch detection
+├── extract.py          # Document field extraction, identity graph, mismatch detection
 ├── adapters.py         # GovTool adapter interface: LIVE/PUBLIC tools + DEMO adapters
 ├── core.py             # CaseStore, NYAYA rules engine, masking helpers
 ├── docs_templates.py   # KARM fixed templates (action letters, RTI, CPGRAMS…)
